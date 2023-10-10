@@ -39,7 +39,7 @@ LOCALE_PATHS = [
     root('kdl_portfolio', 'conf', 'locale'),
 ]
 
-ROOT_URLCONF = 'kdl_portfolio.urls'
+ROOT_URLCONF = 'kdl_portfolio.api.urls'
 
 SECRET_KEY = 'insecure-secret-key'
 

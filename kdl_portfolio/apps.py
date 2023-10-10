@@ -4,6 +4,19 @@ kdl_portfolio Django application initialization.
 
 from django.apps import AppConfig
 
+from edx_django_utils.plugins import PluginSettings, PluginURLs
+# from openedx.core.djangoapps.plugins.constants import (
+#     ProjectType,
+#     PluginSignals,
+# )
+
+# STUDENT_REGISTRATION_COMPLETED = "STUDENT_REGISTRATION_COMPLETED"
+
+# OPENEDX_SIGNALS_PATH = "openedx_events.learning.signals"
+# OPENEDX_SIGNALS = [
+#     STUDENT_REGISTRATION_COMPLETED,
+# ]
+
 
 class KdlPortfolioConfig(AppConfig):
     """
@@ -11,3 +24,101 @@ class KdlPortfolioConfig(AppConfig):
     """
 
     name = 'kdl_portfolio'
+    verbose_name = 'KDL Portfolio'
+
+    # Class attribute that configures and enables this app as a Plugin App.
+    plugin_app = {
+
+        # Configuration setting for Plugin URLs for this app.
+        PluginURLs.CONFIG: {
+
+            # Configure the Plugin URLs for each project type, as needed. The full list of project types for edx-platform is
+            # here:
+            # https://github.com/openedx/edx-platform/blob/2dc79bcab42dafed2c122eb808cdd5604327c890/openedx/core/djangoapps/plugins/constants.py#L14 .
+            # Other IDAs may use different values.
+            'lms.djangoapp': {
+
+                # The namespace to provide to django's urls.include.
+                PluginURLs.NAMESPACE: 'kdl-portfolio',
+
+                # The application namespace to provide to django's urls.include.
+                # Optional; Defaults to None.
+                PluginURLs.APP_NAME: 'portfolio',
+
+                # The regex to provide to django's urls.url.
+                # Optional; Defaults to r''.
+                PluginURLs.REGEX: r'^api/kdl-portfolio/',
+
+                # The python path (relative to this app) to the URLs module to be plugged into the project.
+                # Optional; Defaults to 'urls'.
+                PluginURLs.RELATIVE_PATH: 'api.urls',
+            }
+        },
+
+        # Configuration setting for Plugin Settings for this app.
+        PluginSettings.CONFIG: {
+
+            # Configure the Plugin Settings for each Project Type, as needed. The full list of setting types for edx-platform is
+            # here:
+            # https://github.com/openedx/edx-platform/blob/2dc79bcab42dafed2c122eb808cdd5604327c890/openedx/core/djangoapps/plugins/constants.py#L25 .
+            # Other IDAs may use different values.
+            'lms.djangoapp': {
+                # Configure each settings, as needed.
+                'production': {
+                    # The python path (relative to this app) to the settings module for the relevant Project Type and Settings Type.
+                    # Optional; Defaults to 'settings'.
+                    PluginSettings.RELATIVE_PATH: 'settings.production',
+                },
+                'common': {
+                    PluginSettings.RELATIVE_PATH: 'settings.common',
+                },
+            }
+        },
+        # PluginSignals.CONFIG: {
+        #     ProjectType.LMS: {
+        #         PluginSignals.RELATIVE_PATH: "signals",
+        #         PluginSignals.RECEIVERS: [
+        #             {
+        #                 PluginSignals.RECEIVER_FUNC_NAME: STUDENT_REGISTRATION_COMPLETED.lower(),
+        #                 PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + STUDENT_REGISTRATION_COMPLETED,
+        #             },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: CERTIFICATE_CREATED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + CERTIFICATE_CREATED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: SESSION_LOGIN_COMPLETED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + SESSION_LOGIN_COMPLETED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_ENROLLMENT_CREATED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_ENROLLMENT_CREATED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_ENROLLMENT_CHANGED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_ENROLLMENT_CHANGED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_UNENROLLMENT_COMPLETED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_UNENROLLMENT_COMPLETED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: CERTIFICATE_CHANGED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + CERTIFICATE_CHANGED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: CERTIFICATE_REVOKED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + CERTIFICATE_REVOKED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: COHORT_MEMBERSHIP_CHANGED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COHORT_MEMBERSHIP_CHANGED,
+                    # },
+                    # {
+                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_DISCUSSIONS_CHANGED.lower(),
+                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_DISCUSSIONS_CHANGED,
+                    # },
+        #         ],
+        #     }
+        # },
+    }

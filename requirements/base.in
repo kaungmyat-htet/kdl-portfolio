@@ -2,4 +2,9 @@
 -c constraints.txt
 
 Django             # Web application framework
-django-model-utils        # Provides TimeStampedModel abstract base class
+djangorestframework
+edx-django-utils
+edx-drf-extensions
+edx-opaque-keys[django]
+edx-toggles
+django-environ
