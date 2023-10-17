@@ -140,7 +140,11 @@ setup(
         include=['kdl_portfolio', 'kdl_portfolio.*'],
         exclude=["*tests"],
     ),
-
+    entry_points={
+        'lms.djangoapp': [
+            'kdl_portfolio = kdl_portfolio.apps:KdlPortfolioConfig',
+        ],
+    },
     include_package_data=True,
     install_requires=load_requirements('requirements/base.in'),
     python_requires=">=3.8",
