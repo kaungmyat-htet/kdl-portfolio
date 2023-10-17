@@ -5,17 +5,6 @@ kdl_portfolio Django application initialization.
 from django.apps import AppConfig
 
 from edx_django_utils.plugins import PluginSettings, PluginURLs
-# from openedx.core.djangoapps.plugins.constants import (
-#     ProjectType,
-#     PluginSignals,
-# )
-
-# STUDENT_REGISTRATION_COMPLETED = "STUDENT_REGISTRATION_COMPLETED"
-
-# OPENEDX_SIGNALS_PATH = "openedx_events.learning.signals"
-# OPENEDX_SIGNALS = [
-#     STUDENT_REGISTRATION_COMPLETED,
-# ]
 
 
 class KdlPortfolioConfig(AppConfig):
@@ -74,51 +63,4 @@ class KdlPortfolioConfig(AppConfig):
                 },
             }
         },
-        # PluginSignals.CONFIG: {
-        #     ProjectType.LMS: {
-        #         PluginSignals.RELATIVE_PATH: "signals",
-        #         PluginSignals.RECEIVERS: [
-        #             {
-        #                 PluginSignals.RECEIVER_FUNC_NAME: STUDENT_REGISTRATION_COMPLETED.lower(),
-        #                 PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + STUDENT_REGISTRATION_COMPLETED,
-        #             },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: CERTIFICATE_CREATED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + CERTIFICATE_CREATED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: SESSION_LOGIN_COMPLETED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + SESSION_LOGIN_COMPLETED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_ENROLLMENT_CREATED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_ENROLLMENT_CREATED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_ENROLLMENT_CHANGED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_ENROLLMENT_CHANGED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_UNENROLLMENT_COMPLETED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_UNENROLLMENT_COMPLETED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: CERTIFICATE_CHANGED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + CERTIFICATE_CHANGED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: CERTIFICATE_REVOKED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + CERTIFICATE_REVOKED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: COHORT_MEMBERSHIP_CHANGED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COHORT_MEMBERSHIP_CHANGED,
-                    # },
-                    # {
-                    #     PluginSignals.RECEIVER_FUNC_NAME: COURSE_DISCUSSIONS_CHANGED.lower(),
-                    #     PluginSignals.SIGNAL_PATH: OPENEDX_SIGNALS_PATH + "." + COURSE_DISCUSSIONS_CHANGED,
-                    # },
-        #         ],
-        #     }
-        # },
     }

@@ -15,7 +15,11 @@ REPO_ROOT = APP_ROOT.dirname()  # /blah/blah/blah/.../openedx-plugin-example
 # SECRET = os.environ.get('PORTFOLIO_SECRET', '11g2GS8Xxe') 
 
 SECRET_TOKEN = env('SECRET_TOKEN')
-LMS_URL = env('LMS_URL')
+LMS_URL = env('LMS_BASE_URL')
+
+INSTALLED_APPS = (
+    'kdl_portfolio'
+)
 
 def plugin_settings(settings):
     # Update the provided settings module with any app-specific settings.
@@ -23,5 +27,5 @@ def plugin_settings(settings):
     #     settings.FEATURES['ENABLE_MY_APP'] = True
     #     settings.MY_APP_POLICY = 'foo'
     settings.SECRET_TOKEN = SECRET_TOKEN
-    settings.LMS_URL = LMS_URL
+    settings.LMS_BASE_URL = LMS_URL
 

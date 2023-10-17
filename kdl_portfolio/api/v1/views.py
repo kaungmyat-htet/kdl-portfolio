@@ -38,15 +38,17 @@ SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS']
 
 class isAuthenticatedOrReadOnly(BasePermission):
     def has_permission(self, request, view):
-        if (request.method in SAFE_METHODS or request.user and request.user.is_superuser):
+        if (request.method in SAFE_METHODS or request.user):
             return True
         return False
     
 def serialize_project(project_obj):
     serialized_project = {}
+    serialized_project["id"] = project_obj.id
     serialized_project["title"] = project_obj.title
     serialized_project["description"] = project_obj.description
     serialized_project["project_url"] = project_obj.project_url
+    serialized_project["youtube_url"] = project_obj.youtube_url
     serialized_project["role"] = project_obj.role
     serialized_project["start_date"] = project_obj.start_date
     serialized_project["end_date"] = project_obj.end_date
@@ -55,9 +57,10 @@ def serialize_project(project_obj):
 
 
 def get_student_info(username):
-    # log.info(settings.LMS_BASE_URL)
-    url = f'{settings.LMS_BASE_URL}api/user/v1/accounts/{username}'
-    # log.info(url)
+    log.info(settings.LMS_BASE_URL)
+    url = f'{settings.LMS_BASE_URL}/api/user/v1/accounts/{username}'
+    log.info(url)
+    log.info(settings.SECRET_TOKEN)
     headers = {
         "Authorization": f"Bearer {settings.SECRET_TOKEN}"
     }
@@ -67,7 +70,7 @@ def get_student_info(username):
     return user_info
 
 def get_student_certificates(username):
-    url = f'{settings.LMS_BASE_URL}api/certificates/v0/certificates/{username}'
+    url = f'{settings.LMS_BASE_URL}/api/certificates/v0/certificates/{username}'
     headers = {
         "Authorization": f"Bearer {settings.SECRET_TOKEN}"
     }
@@ -113,16 +116,26 @@ class StudentCareerInfoAPIView(APIView):
     """
     Create a student career info
     """
+    # authentication_classes = (
+    #     JwtAuthentication, SessionAuthenticationAllowInactiveUser
+    # )
+    # permission_classes = (isAuthenticatedOrReadOnly,)
     REQUIRED_KEYS = ['profession', 'highest_level_degree', 'institution', 'skills']
 
     def _validate(self, career_info_obj):
         for key in self.REQUIRED_KEYS:
             if key not in career_info_obj:
                 raise ValidationError(_("Key '{key}' not found.").format(key=key))
+            
+            if key == "skills":
+                log.info(career_info_obj["skills"])
+                career_info_obj["skills"] = {
+                    "skills": career_info_obj["skills"]
+                }
 
         return career_info_obj
     
-    def get(self, request):
+    def get(self, request, username=None):
         if request.user:
             response = {}
             try:
@@ -132,9 +145,16 @@ class StudentCareerInfoAPIView(APIView):
                     response["profession"] = student_info.profession
                     response["highest_level_degree"] = student_info.highest_level_degree
                     response["institution"] = student_info.institution
-                    response["skills"] = student_info.skills
+                    skills = student_info.skills
+                    response["skills"] = skills["skills"]
+                    response["isNew"] = 'false'
                 except StudentCareerInfo.DoesNotExist:
                     log.info("Student info does not exist.")
+                    response["profession"] = ''
+                    response["highest_level_degree"] = ''
+                    response["institution"] = ''
+                    response["skills"] = []
+                    response["isNew"] = 'true'
 
                 user_info = get_student_info(request.user)
                 
@@ -161,25 +181,52 @@ class StudentCareerInfoAPIView(APIView):
                 try:
                     student = User.objects.get(username = username)
                 except User.DoesNotExist:
-                    return Response({"error": "The user does not exists"})
+                    return Response({"error": "The user does not exists"}, status=status.HTTP_400_BAD_REQUEST)
                 career_info_object = self._validate(career_info_object)
                 # log.info(career_info_object)
                 StudentCareerInfo.objects.submit_student_career_info(student, career_info_object)
+                return Response({"detail": "Student career path info created successfully."}, status=status.HTTP_201_CREATED)
             else:
                 return Response({"detail": "Please make sure you logged into our system."})
         except ValidationError as exc:
             return Response({
                 "detail": _(' ').join(str(msg) for msg in exc.messages),
             }, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, username):
+        career_info_object = request.data
+        try:
+            career_info_object = self._validate(career_info_object)
+        except ValidationError as exc:
+            return Response({
+                "detail": _(' ').join(str(msg) for msg in exc.messages),
+            }, status=status.HTTP_400_BAD_REQUEST)
         
-        return Response({"detail": "Student career path info created successfully."}, status=status.HTTP_201_CREATED)
+        log.info(career_info_object)
+        try:
+            student = User.objects.get(username = username)
+        except User.DoesNotExist:
+            return Response({"error": "The user does not exists"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            student_info = StudentCareerInfo.objects.get(student=student)
+            is_success = StudentCareerInfo.objects.update_student_career_info(student=student, student_career_obj=career_info_object)
+            if is_success:
+                return Response({"detail": "Your information is updated successfully."}, status=status.HTTP_200_OK)
+            return Response({"detail": "Update action failed."}, status=status.HTTP_400_BAD_REQUEST)
+        except StudentCareerInfo.DoesNotExist:
+            return Response({"detail": "User Info does not found."}, status=status.HTTP_400_BAD_REQUEST)
     
 @view_auth_classes(is_authenticated=True)
 class ProjectAPIView(APIView):
     """
     Projects API View
     """
-    REQUIRED_KEYS = ['description', 'title', 'project_url', 'role', 'start_date', 'end_date']
+    # authentication_classes = (
+    #     JwtAuthentication, SessionAuthenticationAllowInactiveUser
+    # )
+    # permission_classes = (isAuthenticatedOrReadOnly,)
+    REQUIRED_KEYS = ['description', 'title', 'project_url', 'youtube_url','role', 'start_date', 'end_date']
     def _validate(self, project_obj):
         for key in self.REQUIRED_KEYS:
             if key not in project_obj:
@@ -215,7 +262,25 @@ class ProjectAPIView(APIView):
                 return Response({
                     "detail": _(' ').join(str(msg) for msg in exc.messages),
                 }, status=status.HTTP_400_BAD_REQUEST)
+            
+    def delete(self, request):
+        project_id = request.query_params.get('id')
+        username = request.user
+        response = {}
+        try:
+            student = User.objects.get(username = username)
+            try:
+                instance = Project.objects.get(id=project_id, student_id=student)
+                instance.delete()
+                response["detail"] = _("{name} project deleted successfully.").format(name = instance.title)
+            except Project.DoesNotExist:
+                return Response({
+                    "error": _("Project {project_id} do not exists.").format(project_id=project_id),
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response({"detail": "The user does not exists"})
         
+        return Response(response, status=status.HTTP_200_OK)
 
 @api_view(["GET"])
 def get_student_projects(request, username):

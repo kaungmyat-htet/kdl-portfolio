@@ -2,6 +2,7 @@
 Database models for kdl_portfolio.
 """
 import logging
+import json
 
 from django.contrib.auth import get_user_model
 from django.db import models, IntegrityError
@@ -14,6 +15,8 @@ User = get_user_model()
     
 class StudentCareerInfoManager(models.Manager):
     def submit_student_career_info(self, student, student_career_obj):
+        # skills = json.loads(student_career_obj["skills"])
+        log.info(student_career_obj)
         try:
             # student = Student.objects.get(id=student_career_obj["id"])
             obj, is_created = self.get_or_create(
@@ -31,6 +34,26 @@ class StudentCareerInfoManager(models.Manager):
         
         return is_created
     
+    def update_student_career_info(self, student, student_career_obj):
+        try:
+            obj = self.get(student=student)
+            if obj.profession != student_career_obj["profession"]:
+                obj.profession = student_career_obj["profession"]
+            if obj.highest_level_degree != student_career_obj["highest_level_degree"]:
+                obj.highest_level_degree = student_career_obj["highest_level_degree"]
+            if obj.institution != student_career_obj["institution"]:
+                obj.institution = student_career_obj["institution"]
+            if obj.skills != student_career_obj["skills"]:
+                obj.skills = student_career_obj["skills"]
+            obj.save()
+            return True
+        except IntegrityError:
+            log.error(
+                "An error raised while trying to create student career info for %s", student_career_obj["id"]
+            )
+            return False
+
+    
 class ProjectManager(models.Manager):
     def submit_project(self, user, project_obj):
         try:
@@ -39,6 +62,7 @@ class ProjectManager(models.Manager):
                 description = project_obj["description"],
                 title = project_obj["title"],
                 project_url = project_obj["project_url"],
+                youtube_url = project_obj["youtube_url"],
                 role = project_obj["role"],
                 start_date = project_obj["start_date"],
                 end_date = project_obj["end_date"]
@@ -76,10 +100,11 @@ class Project(models.Model):
     """
     Create Projects that students have done
     """
+    student_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
     title = models.CharField(max_length=120, null=False)
     description = models.TextField()
-    student_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False)
-    project_url = models.URLField()
+    youtube_url = models.URLField(null=True)
+    project_url = models.URLField(null=True)
     role = models.CharField(max_length=40)
     start_date = models.DateField()
     end_date = models.DateField()
